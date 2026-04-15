@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Prenotazioni Laboratori – TO1/TO3</title>
+  <style>
+    :root { --bg:#0b1020; --card:#141a2f; --ink:#eef2ff; --muted:#9aa3b2; --accent:#6ea8fe; --danger:#ff6b6b; --ok:#79d28a; --grid:#1f2742; }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; background: radial-gradient(1250px 600px at 10% -10%, #1a2445 0%, #081022 55%), var(--bg); color: var(--ink); }
+
+    /* Password gate */
+    #gate { position: fixed; inset: 0; display: grid; place-items: center; background: linear-gradient(180deg, rgba(8,14,30,.85), rgba(8,14,30,.92)); z-index: 50; }
+    #gate .card { width: min(520px, 92vw); background: var(--card); padding: 24px; border-radius: 18px; box-shadow: 0 20px 60px rgba(0,0,0,.45); border: 1px solid #243056; }
+    .title { margin: 0 0 6px 0; font-weight: 700; letter-spacing:.2px; }
+    .subtitle { margin: 0 0 16px 0; color: var(--muted); font-size: 0.95rem; }
+    .input-row { display: flex; gap: 10px; }
+    input[type=password], input[type=text], select { flex: 1; padding: 12px 14px; border-radius: 12px; border: 1px solid #2a355c; background: #0e1430; color: var(--ink); outline: none; }
+    button { cursor: pointer; border: 0; border-radius: 12px; padding: 12px 14px; background: linear-gradient(180deg, #7aa8ff, #4a7dff); color: #0a1024; font-weight: 700; box-shadow: 0 6px 22px rgba(88,132,255,.35); }
+    button.ghost { background: none; color: var(--ink); border: 1px solid #2a355c; box-shadow: none; }
+    .err { color: var(--danger); font-size: .9rem; min-height: 1em; margin-top: 8px; }
+
+    /* Layout */
+    .wrap { max-width: 1100px; margin: 28px auto; padding: 0 16px 48px; }
+    header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+    .brand { font-weight: 800; font-size: 1.05rem; letter-spacing:.3px; }
+    .month-nav { display: flex; align-items: center; gap: 8px; }
+    .month-nav button { padding: 10px 12px; border-radius: 10px; }
+    .month-label { min-width: 240px; text-align: center; font-weight: 700; }
+
+    .lab-picker { display:flex; gap:8px; align-items:center; }
+    .lab-picker select { width: auto; }
+
+    /* Calendar */
+    .cal { background: var(--card); border-radius: 16px; border: 1px solid #233058; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,.35); }
+    .cal .dow { display: grid; grid-template-columns: repeat(7, 1fr); background: #0f1633; border-bottom: 1px solid #223056; }
+    .cal .dow div { padding: 10px; font-size: .85rem; color: var(--muted); text-align: center; }
+    .grid { display: grid; grid-template-columns: repeat(7, 1fr); }
+    .cell { border: 1px solid var(--grid); min-height: 96px; padding: 8px; position: relative; background: #0c1330; transition: background .15s ease; cursor: pointer; }
+    .cell:hover { background: #10183b; }
+    .cell .n { font-weight: 700; color: #d9e2ff; }
+    .cell.out { opacity: .45; }
+    .cell .dot { width: 8px; height: 8px; background: var(--ok); border-radius: 50%; position: absolute; right: 8px; bottom: 8px; box-shadow: 0 0 0 2px rgba(121,210,138,.15); }
+    .cell .dot.busy { background: #ffd36e; box-shadow: 0 0 0 2px rgba(255,211,110,.18); }
+
+    /* Modal */
+    dialog { width: min(820px, 96vw); border: 1px solid #26335b; border-radius: 16px; background: #0d1431; color: var(--ink); box-shadow: 0 30px 120px rgba(0,0,0,.55); }
+    dialog::backdrop { background: rgba(5,8,18,.6); backdrop-filter: blur(2px); }
+    .modal-head { display:flex; justify-content: space-between; align-items:center; padding: 14px 16px; border-bottom: 1px solid #202c52; }
+    .modal-title { font-weight: 800; }
+    .modal-body { padding: 12px 16px 18px; }
+
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border-bottom: 1px solid #1c264a; padding: 10px 8px; text-align: left; }
+    th { color: var(--muted); font-weight: 600; }
+    .tag { display:inline-flex; align-items:center; gap:6px; padding: 4px 8px; border-radius: 999px; border: 1px solid #2a355f; font-size: .85rem; color:#bfd3ff; }
+    .tag.busy { color:#1a1f33; background: #ffd36e; border-color: #e9bd59; }
+    .tag.free { color:#0f2a17; background: #79d28a; border-color: #66bf77; }
+    .row-actions { display:flex; gap:8px; }
+
+    .inline-form { display:flex; gap:8px; margin-top:8px; }
+    .inline-form input[type=text] { flex:1; }
+
+    .foot { display:flex; justify-content: space-between; align-items:center; gap:8px; padding: 8px 16px 16px; color: var(--muted); }
+    .legend { display:flex; gap:12px; align-items:center; }
+    .legend span { display:inline-flex; align-items:center; gap:6px; }
+    .legend .dotl { width:10px; height:10px; border-radius:50%; display:inline-block; }
+
+    .warn { color:#ffd36e; font-size:.92rem; }
+  </style>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+    import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, query, where, updateDoc, deleteField } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDCPKcIchnUenkZbPlru_S3l2qFbPs0zBA",
+      authDomain: "prova-e1e4f.firebaseapp.com",
+      projectId: "prova-e1e4f",
+      storageBucket: "prova-e1e4f.firebasestorage.app",
+      messagingSenderId: "1003361096683",
+      appId: "1:1003361096683:web:b64a04eff710fe12d77fae"
+    };
+
+    let appFB = null, db = null;
+    try { appFB = initializeApp(firebaseConfig); db = getFirestore(appFB); }
+    catch(e){ console.warn('Firebase non configurato o configurazione non valida. Funzionamento senza sincronizzazione.'); }
+
+    // Doppia password
+    const PASSWORD_USER = "Prenotazioni";
+    const PASSWORD_ADMIN = "PrenotazioniAdmin";
+    let isAdmin = false;
+
+    // Gate
+    const gate = document.getElementById('gate');
+    const app = document.getElementById('app');
+    const pwd = document.getElementById('pwd');
+    const gateErr = document.getElementById('gateErr');
+    document.getElementById('enterBtn').addEventListener('click', unlock);
+    pwd.addEventListener('keydown', (e)=>{ if(e.key==='Enter') unlock(); });
+    function unlock(){
+      const val = pwd.value;
+      if(val === PASSWORD_USER){ isAdmin = false; openApp(); }
+      else if(val === PASSWORD_ADMIN){ isAdmin = true; openApp(); }
+      else { gateErr.textContent = 'Password errata.'; pwd.focus(); pwd.select(); }
+    }
+    function openApp(){ gate.style.display = 'none'; app.hidden = false; initCalendar(); attachRealtime(); }
+
+    // Sedi/Labs
+    const LABS = { TO1: [ 'laboratorio 27', 'laboratorio 29', 'laboratorio multimediale' ], TO3: [ 'laboratorio 1', 'laboratorio 2' ] };
+    const locale = 'it-IT';
+
+    const siteSel = document.getElementById('siteSel');
+    const labSel  = document.getElementById('labSel');
+    const brand = document.getElementById('brand');
+
+    function fillSite(){ siteSel.innerHTML = Object.keys(LABS).map(k=>`<option value="${k}">${k}</option>`).join(''); fillLabs(); }
+    function fillLabs(){ const site = siteSel.value; labSel.innerHTML = LABS[site].map(n=>`<option value="${n}">${n}</option>`).join(''); updateBrand(); refreshMonthListener(); render(); }
+    function updateBrand(){ brand.textContent = `${siteSel.value} • ${labSel.value} – Prenotazioni${isAdmin? ' (Admin)' : ''}`; }
+    siteSel.addEventListener('change', fillLabs);
+    labSel.addEventListener('change', ()=>{ updateBrand(); refreshMonthListener(); render(); });
+
+    // Calendar state
+    const grid = document.getElementById('grid');
+    const monthLabel = document.getElementById('monthLabel');
+    const prevBtn = document.getElementById('prevMonth');
+    const nextBtn = document.getElementById('nextMonth');
+
+    let view = ( ()=>{ const d=new Date(); return { y:d.getFullYear(), m:d.getMonth() }; })();
+
+    prevBtn.addEventListener('click', ()=>{ shiftMonth(-1); });
+    nextBtn.addEventListener('click', ()=>{ shiftMonth(1); });
+
+    function shiftMonth(delta){ let m = view.m + delta, y = view.y; if(m < 0){ m = 11; y--; } else if(m > 11){ m = 0; y++; } view = { y, m }; refreshMonthListener(); render(); }
+
+    function initCalendar(){ fillSite(); render(); }
+
+    // Realtime/cache
+    let unsub = null; let monthCache = {};
+    function labKey(){ return `${siteSel.value}__${labSel.value}`; }
+    function monthStr(){ return `${view.y}-${String(view.m+1).padStart(2,'0')}`; }
+
+    function attachRealtime(){ refreshMonthListener(); }
+    function refreshMonthListener(){ if(unsub){ unsub(); unsub = null; } monthCache = {}; if(!db) return; const daysCol = collection(db, 'labs', labKey(), 'days'); const q = query(daysCol, where('month','==', monthStr())); unsub = onSnapshot(q, (snap)=>{ monthCache = {}; snap.forEach(docu=>{ monthCache[docu.id] = docu.data(); }); render(); }); }
+
+    // Rendering
+    function render(){
+      const first = new Date(view.y, view.m, 1);
+      const startIdx = ( (first.getDay() + 6) % 7 ); // Monday=0
+      const daysInMonth = new Date(view.y, view.m+1, 0).getDate();
+      const prevMonthDays = new Date(view.y, view.m, 0).getDate();
+      monthLabel.textContent = first.toLocaleDateString(locale, { month:'long', year:'numeric' });
+      grid.innerHTML = '';
+      const cells = 42; // 6 weeks grid
+      for(let i=0;i<cells;i++){
+        const cell = document.createElement('div'); cell.className = 'cell';
+        let dayNum, dateObj, out=false;
+        if(i < startIdx){ dayNum = prevMonthDays - startIdx + i + 1; dateObj = new Date(view.y, view.m-1, dayNum); out = true; }
+        else if(i >= startIdx + daysInMonth){ dayNum = i - (startIdx + daysInMonth) + 1; dateObj = new Date(view.y, view.m+1, dayNum); out = true; }
+        else { dayNum = i - startIdx + 1; dateObj = new Date(view.y, view.m, dayNum); }
+        const n = document.createElement('div'); n.className='n'; n.textContent = dayNum; cell.appendChild(n);
+        if(out) cell.classList.add('out');
+        const iso = isoDate(dateObj);
+        const any = !!(monthCache[iso] && monthCache[iso].slots && Object.keys(monthCache[iso].slots).length);
+        if(any){ const dot = document.createElement('div'); dot.className = 'dot busy'; cell.appendChild(dot); }
+        cell.addEventListener('click', ()=> openDay(dateObj));
+        grid.appendChild(cell);
+      }
+    }
+
+    // Modal/slots
+    const dialog = document.getElementById('dayDialog');
+    const dialogTitle = document.getElementById('dialogTitle');
+    const slotsBody = document.getElementById('slotsBody');
+    document.getElementById('closeDialog').addEventListener('click', ()=> { if (typeof dialog.close === 'function') dialog.close(); else { dialog.removeAttribute('open'); dialog.style.display='none'; document.body.style.overflow=''; } });
+
+    const SLOTS = ['08:00-09:00','09:00-10:00','10:00-11:00','11:00-12:00','12:00-13:00','13:00-14:00','14:00-15:00','15:00-16:00'];
+    let currentISO = null;
+
+    async function openDay(dateObj){ currentISO = isoDate(dateObj); dialogTitle.textContent = `${siteSel.value} • ${labSel.value} — ${dateObj.toLocaleDateString(locale, { weekday:'long', year:'numeric', month:'long', day:'numeric' })}`; await ensureDayLoaded(currentISO); buildSlots(); if (typeof dialog.showModal === 'function') dialog.showModal(); else { dialog.setAttribute('open',''); dialog.style.display='block'; document.body.style.overflow='hidden'; } }
+
+    async function ensureDayLoaded(iso){ if(monthCache[iso]) return; if(!db) { monthCache[iso] = { month: monthStr(), slots: {} }; return; } const ref = doc(db, 'labs', labKey(), 'days', iso); const snap = await getDoc(ref); if(snap.exists()) monthCache[iso] = snap.data(); else monthCache[iso] = { month: monthStr(), slots: {} }; }
+
+    function buildSlots(){ const dayMap = monthCache[currentISO]?.slots || {}; slotsBody.innerHTML = ''; SLOTS.forEach(slot => { const tr = document.createElement('tr'); const tdTime = document.createElement('td'); tdTime.textContent = slot; tr.appendChild(tdTime); const tdState = document.createElement('td'); const booked = !!dayMap[slot]; const tag = document.createElement('span'); tag.className = 'tag ' + (booked ? 'busy' : 'free'); tag.textContent = booked ? 'Prenotato' : 'Libero'; tdState.appendChild(tag); tr.appendChild(tdState); const tdInfo = document.createElement('td'); tdInfo.textContent = booked ? `${dayMap[slot].prof} – Classe ${dayMap[slot].classe}` : '—'; tr.appendChild(tdInfo); const tdAct = document.createElement('td'); const actions = document.createElement('div'); actions.className = 'row-actions'; if(!booked){ const btn = document.createElement('button'); btn.textContent = 'Prenota'; btn.addEventListener('click', ()=> showInlineForm(tr, slot)); actions.appendChild(btn); } else if(isAdmin){ const del = document.createElement('button'); del.textContent = 'Cancella'; del.className='ghost'; del.addEventListener('click', ()=> { cancelSlot(slot); }); actions.appendChild(del); } tdAct.appendChild(actions); tr.appendChild(tdAct); slotsBody.appendChild(tr); }); }
+
+    function showInlineForm(tr, slot){ const old = tr.parentElement.querySelectorAll('.inline-form-row'); old.forEach(n => n.remove()); const form = document.createElement('div'); form.className = 'inline-form'; const p = document.createElement('input'); p.type = 'text'; p.placeholder = 'Nome professore'; p.autocomplete = 'name'; const c = document.createElement('input'); c.type = 'text'; c.placeholder = 'Classe'; const save = document.createElement('button'); save.textContent = 'Conferma'; const cancel = document.createElement('button'); cancel.textContent = 'Annulla'; cancel.className='ghost'; save.addEventListener('click', ()=>{ const prof = (p.value||'').trim(); const classe = (c.value||'').trim(); if(!prof || !classe){ p.focus(); return; } bookSlot(slot, { prof, classe }); }); cancel.addEventListener('click', ()=> form.remove()); form.appendChild(p); form.appendChild(c); form.appendChild(save); form.appendChild(cancel); const td = document.createElement('td'); td.colSpan = 4; td.appendChild(form); const trForm = document.createElement('tr'); trForm.className='inline-form-row'; trForm.appendChild(td); tr.insertAdjacentElement('afterend', trForm); p.focus(); }
+
+    async function bookSlot(slot, data){ if(!monthCache[currentISO]) monthCache[currentISO] = { month: monthStr(), slots: {} }; if(monthCache[currentISO].slots[slot]){ buildSlots(); return; } monthCache[currentISO].slots[slot] = { prof: data.prof, classe: data.classe, ts: Date.now() }; buildSlots(); render(); if(db){ const ref = doc(db, 'labs', labKey(), 'days', currentISO); await setDoc(ref, monthCache[currentISO], { merge: true }); } else { const dbLoc = loadAllLocal(); if(!dbLoc[labKey()]) dbLoc[labKey()] = {}; if(!dbLoc[labKey()][currentISO]) dbLoc[labKey()][currentISO] = { month: monthStr(), slots:{} }; dbLoc[labKey()][currentISO].slots[slot] = monthCache[currentISO].slots[slot]; saveAllLocal(dbLoc); } }
+
+    async function cancelSlot(slot){ if(!isAdmin) return; if(!monthCache[currentISO] || !monthCache[currentISO].slots[slot]){ buildSlots(); return; } delete monthCache[currentISO].slots[slot]; buildSlots(); render(); if(db){ const ref = doc(db, 'labs', labKey(), 'days', currentISO); await updateDoc(ref, { [`slots.${slot}`]: deleteField(), month: monthStr() }); } else { const dbLoc = loadAllLocal(); if(dbLoc[labKey()] && dbLoc[labKey()][currentISO]){ delete dbLoc[labKey()][currentISO].slots[slot]; saveAllLocal(dbLoc); } } }
+
+    function isoDate(d){ const y = d.getFullYear(); const m = String(d.getMonth()+1).padStart(2,'0'); const da = String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${da}`; }
+
+    // Fallback localStorage per test/offline
+    const LKEY = 'labs_multi_bookings_v1';
+    function loadAllLocal(){ try { return JSON.parse(localStorage.getItem(LKEY)) || {}; } catch(e){ return {}; } }
+    function saveAllLocal(data){ localStorage.setItem(LKEY, JSON.stringify(data)); }
+
+    const warn = document.getElementById('warn');
+    if(!db){ warn.textContent = 'Sincronizzazione disattivata: configura Firebase per visibilità multi-PC.'; }
+  </script>
+</head>
+<body>
+  <!-- Password Gate -->
+  <div id="gate">
+    <div class="card">
+      <h1 class="title">Prenotazioni Laboratori – Accesso</h1>
+      <p class="subtitle">Inserisci la password (utente o admin).</p>
+      <div class="input-row">
+        <input id="pwd" type="password" placeholder="Password" autocomplete="current-password" />
+        <button id="enterBtn" aria-label="Entra">Entra</button>
+      </div>
+      <div id="gateErr" class="err"></div>
+    </div>
+  </div>
+
+  <div class="wrap" aria-hidden="true" id="app" hidden>
+    <header>
+      <div class="lab-picker">
+        <label for="siteSel" class="sr-only">Sede</label>
+        <select id="siteSel" title="Sede"></select>
+        <label for="labSel" class="sr-only">Laboratorio</label>
+        <select id="labSel" title="Laboratorio"></select>
+      </div>
+      <div id="brand" class="brand">Prenotazioni</div>
+      <div class="month-nav">
+        <button id="prevMonth" class="ghost" aria-label="Mese precedente">◀</button>
+        <div class="month-label" id="monthLabel"></div>
+        <button id="nextMonth" class="ghost" aria-label="Mese successivo">▶</button>
+      </div>
+    </header>
+
+    <section class="cal" aria-label="Calendario mensile">
+      <div class="dow">
+        <div>Lun</div><div>Mar</div><div>Mer</div><div>Gio</div><div>Ven</div><div>Sab</div><div>Dom</div>
+      </div>
+      <div id="grid" class="grid"></div>
+    </section>
+
+    <p id="warn" class="warn"></p>
+  </div>
+
+  <!-- Modal Giorno -->
+  <dialog id="dayDialog" aria-label="Dettaglio prenotazioni giornaliere">
+    <div class="modal-head">
+      <div class="modal-title" id="dialogTitle"></div>
+      <button id="closeDialog" class="ghost">Chiudi</button>
+    </div>
+    <div class="modal-body">
+      <table>
+        <thead>
+          <tr>
+            <th>Ora</th>
+            <th>Stato</th>
+            <th>Dettagli</th>
+            <th>Azioni</th>
+          </tr>
+        </thead>
+        <tbody id="slotsBody"></tbody>
+      </table>
+    </div>
+    <div class="foot">
+      <div class="legend">
+        <span><span class="dotl" style="background:#79d28a;"></span> Libero</span>
+        <span><span class="dotl" style="background:#ffd36e;"></span> Prenotato</span>
+      </div>
+    </div>
+  </dialog>
+</body>
+</html>
