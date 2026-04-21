@@ -5,58 +5,84 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Prenotazioni Laboratori – TO1/TO3</title>
   <style>
-    :root { --bg:#0b1020; --card:#141a2f; --ink:#eef2ff; --muted:#9aa3b2; --accent:#6ea8fe; --danger:#ff6b6b; --ok:#79d28a; --grid:#1f2742; }
+    :root {
+      --bg: #f3f6fc;
+      --card: #ffffff;
+      --ink: #1a2340;
+      --muted: #6b7280;
+      --accent: #4a7dff;
+      --accent-2: #6ea8fe;
+      --danger: #d64545;
+      --ok: #2e9f48;
+      --grid: #e6eaf3;
+      --border: #d9dfeb;
+      --cell: #ffffff;
+      --cell-hover: #eef2fb;
+      --soft: #f7f9fe;
+      --warn: #a86a00;
+    }
     * { box-sizing: border-box; }
     html, body { height: 100%; }
-    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; background: radial-gradient(1250px 600px at 10% -10%, #1a2445 0%, #081022 55%), var(--bg); color: var(--ink); }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: radial-gradient(1250px 600px at 10% -10%, #e6ecfa 0%, #f3f6fc 55%), var(--bg);
+      color: var(--ink);
+    }
 
     /* Password gate */
-    #gate { position: fixed; inset: 0; display: grid; place-items: center; background: linear-gradient(180deg, rgba(8,14,30,.85), rgba(8,14,30,.92)); z-index: 50; }
-    #gate .card { width: min(520px, 92vw); background: var(--card); padding: 24px; border-radius: 18px; box-shadow: 0 20px 60px rgba(0,0,0,.45); border: 1px solid #243056; }
-    .title { margin: 0 0 6px 0; font-weight: 700; letter-spacing:.2px; }
+    #gate { position: fixed; inset: 0; display: grid; place-items: center; background: linear-gradient(180deg, rgba(30,45,80,.18), rgba(30,45,80,.28)); z-index: 50; }
+    #gate .card { width: min(520px, 92vw); background: var(--card); padding: 24px; border-radius: 18px; box-shadow: 0 20px 60px rgba(30,45,80,.18); border: 1px solid var(--border); }
+    .title { margin: 0 0 6px 0; font-weight: 700; letter-spacing:.2px; color: var(--ink); }
     .subtitle { margin: 0 0 16px 0; color: var(--muted); font-size: 0.95rem; }
     .input-row { display: flex; gap: 10px; }
-    input[type=password], input[type=text], select { flex: 1; padding: 12px 14px; border-radius: 12px; border: 1px solid #2a355c; background: #0e1430; color: var(--ink); outline: none; }
-    button { cursor: pointer; border: 0; border-radius: 12px; padding: 12px 14px; background: linear-gradient(180deg, #7aa8ff, #4a7dff); color: #0a1024; font-weight: 700; box-shadow: 0 6px 22px rgba(88,132,255,.35); }
-    button.ghost { background: none; color: var(--ink); border: 1px solid #2a355c; box-shadow: none; }
+    input[type=password], input[type=text], select, textarea {
+      flex: 1; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--soft); color: var(--ink); outline: none; font-family: inherit; font-size: 1rem;
+    }
+    textarea { resize: vertical; min-height: 56px; width: 100%; }
+    input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(74,125,255,.18); }
+    button { cursor: pointer; border: 0; border-radius: 12px; padding: 12px 14px; background: linear-gradient(180deg, #6a97ff, #4a7dff); color: #ffffff; font-weight: 700; box-shadow: 0 6px 18px rgba(74,125,255,.28); }
+    button:hover { filter: brightness(1.04); }
+    button.ghost { background: none; color: var(--ink); border: 1px solid var(--border); box-shadow: none; }
+    button.ghost:hover { background: var(--soft); }
     .err { color: var(--danger); font-size: .9rem; min-height: 1em; margin-top: 8px; }
 
     /* Layout */
     .wrap { max-width: 1100px; margin: 28px auto; padding: 0 16px 48px; }
     header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
-    .brand { font-weight: 800; font-size: 1.05rem; letter-spacing:.3px; }
+    .brand { font-weight: 800; font-size: 1.05rem; letter-spacing:.3px; color: var(--ink); }
     .month-nav { display: flex; align-items: center; gap: 8px; }
     .month-nav button { padding: 10px 12px; border-radius: 10px; }
-    .month-label { min-width: 240px; text-align: center; font-weight: 700; }
+    .month-label { min-width: 240px; text-align: center; font-weight: 700; color: var(--ink); }
 
     .lab-picker { display:flex; gap:8px; align-items:center; }
     .lab-picker select { width: auto; }
 
     /* Calendar */
-    .cal { background: var(--card); border-radius: 16px; border: 1px solid #233058; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,.35); }
-    .cal .dow { display: grid; grid-template-columns: repeat(7, 1fr); background: #0f1633; border-bottom: 1px solid #223056; }
-    .cal .dow div { padding: 10px; font-size: .85rem; color: var(--muted); text-align: center; }
+    .cal { background: var(--card); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 10px 30px rgba(30,45,80,.06); }
+    .cal .dow { display: grid; grid-template-columns: repeat(7, 1fr); background: #eef2fb; border-bottom: 1px solid var(--border); }
+    .cal .dow div { padding: 10px; font-size: .85rem; color: var(--muted); text-align: center; font-weight: 600; }
     .grid { display: grid; grid-template-columns: repeat(7, 1fr); }
-    .cell { border: 1px solid var(--grid); min-height: 96px; padding: 8px; position: relative; background: #0c1330; transition: background .15s ease; cursor: pointer; }
-    .cell:hover { background: #10183b; }
-    .cell .n { font-weight: 700; color: #d9e2ff; }
+    .cell { border: 1px solid var(--grid); min-height: 96px; padding: 8px; position: relative; background: var(--cell); transition: background .15s ease; cursor: pointer; }
+    .cell:hover { background: var(--cell-hover); }
+    .cell .n { font-weight: 700; color: var(--ink); }
     .cell.out { opacity: .45; }
-    .cell .dot { width: 8px; height: 8px; background: var(--ok); border-radius: 50%; position: absolute; right: 8px; bottom: 8px; box-shadow: 0 0 0 2px rgba(121,210,138,.15); }
-    .cell .dot.busy { background: #ffd36e; box-shadow: 0 0 0 2px rgba(255,211,110,.18); }
+    .cell .dot { width: 8px; height: 8px; background: var(--ok); border-radius: 50%; position: absolute; right: 8px; bottom: 8px; box-shadow: 0 0 0 2px rgba(46,159,72,.18); }
+    .cell .dot.busy { background: #e3a500; box-shadow: 0 0 0 2px rgba(227,165,0,.22); }
 
     /* Modal */
-    dialog { width: min(820px, 96vw); border: 1px solid #26335b; border-radius: 16px; background: #0d1431; color: var(--ink); box-shadow: 0 30px 120px rgba(0,0,0,.55); }
-    dialog::backdrop { background: rgba(5,8,18,.6); backdrop-filter: blur(2px); }
-    .modal-head { display:flex; justify-content: space-between; align-items:center; padding: 14px 16px; border-bottom: 1px solid #202c52; }
-    .modal-title { font-weight: 800; }
+    dialog { width: min(820px, 96vw); border: 1px solid var(--border); border-radius: 16px; background: var(--card); color: var(--ink); box-shadow: 0 30px 120px rgba(30,45,80,.22); }
+    dialog::backdrop { background: rgba(30,45,80,.30); backdrop-filter: blur(2px); }
+    .modal-head { display:flex; justify-content: space-between; align-items:center; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    .modal-title { font-weight: 800; color: var(--ink); }
     .modal-body { padding: 12px 16px 18px; }
 
     table { width: 100%; border-collapse: collapse; }
-    th, td { border-bottom: 1px solid #1c264a; padding: 10px 8px; text-align: left; }
+    th, td { border-bottom: 1px solid var(--grid); padding: 10px 8px; text-align: left; }
     th { color: var(--muted); font-weight: 600; }
-    .tag { display:inline-flex; align-items:center; gap:6px; padding: 4px 8px; border-radius: 999px; border: 1px solid #2a355f; font-size: .85rem; color:#bfd3ff; }
-    .tag.busy { color:#1a1f33; background: #ffd36e; border-color: #e9bd59; }
-    .tag.free { color:#0f2a17; background: #79d28a; border-color: #66bf77; }
+    .tag { display:inline-flex; align-items:center; gap:6px; padding: 4px 8px; border-radius: 999px; border: 1px solid var(--border); font-size: .85rem; color: #355099; background: #f0f4fc; }
+    .tag.busy { color:#3a2a00; background: #ffd36e; border-color: #e9bd59; }
+    .tag.free { color:#0e3a1d; background: #bfe8c8; border-color: #8ed49c; }
     .row-actions { display:flex; gap:8px; }
 
     .inline-form { display:flex; gap:8px; margin-top:8px; }
@@ -67,11 +93,42 @@
     .legend span { display:inline-flex; align-items:center; gap:6px; }
     .legend .dotl { width:10px; height:10px; border-radius:50%; display:inline-block; }
 
-    .warn { color:#ffd36e; font-size:.92rem; }
+    .warn { color: var(--warn); font-size:.92rem; }
+
+    /* Announcements */
+    .announcements { background: var(--card); border-radius: 16px; border: 1px solid var(--border); padding: 18px 20px; margin-top: 20px; box-shadow: 0 6px 20px rgba(30,45,80,.05); }
+    .announcements.announcements-top { margin-top: 0; margin-bottom: 20px; }
+    .announcements h2 { margin: 0 0 4px 0; font-size: 1.1rem; color: var(--ink); }
+    .announcements .subtitle2 { margin: 0 0 14px 0; font-size: .9rem; color: var(--muted); }
+    .ann-form { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; padding: 12px; background: var(--soft); border: 1px dashed var(--border); border-radius: 12px; }
+    [hidden] { display: none !important; }
+    .ann-form .row-end { display: flex; justify-content: flex-end; }
+    .announce-list { display: flex; flex-direction: column; gap: 10px; }
+    .announce-item { background: var(--soft); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; display: flex; gap: 12px; align-items: flex-start; justify-content: space-between; }
+    .announce-item .ann-left { flex: 1; min-width: 0; }
+    .announce-item .text { color: var(--ink); white-space: pre-wrap; word-break: break-word; }
+    .announce-item .meta { font-size: .8rem; color: var(--muted); margin-top: 6px; }
+    .announce-item button.del { background: #fdecec; color: #a31e1e; border: 1px solid #f2c2c2; padding: 6px 10px; font-size: .85rem; box-shadow: none; font-weight: 600; }
+    .announce-item button.del:hover { background: #f9dcdc; }
+    .no-announce { color: var(--muted); font-style: italic; margin: 4px 0 0; }
+
+    .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+
+    /* Google Sign-In button */
+    .google-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; background: #ffffff; color: #3c4043; border: 1px solid #dadce0; padding: 12px 16px; border-radius: 12px; font-weight: 600; box-shadow: 0 1px 3px rgba(60,64,67,.08); margin-top: 8px; }
+    .google-btn:hover { background: #f8f9fa; box-shadow: 0 2px 6px rgba(60,64,67,.15); }
+    .google-btn:disabled { opacity: .6; cursor: wait; }
+
+    /* Topbar user info */
+    .topbar { display: flex; justify-content: flex-end; align-items: center; margin-bottom: 12px; }
+    .user-info { display: flex; align-items: center; gap: 10px; }
+    .user-info .user-email { color: var(--muted); font-size: .9rem; }
+    .user-info button { padding: 8px 12px; font-size: .9rem; }
   </style>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-    import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, query, where, updateDoc, deleteField } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+    import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, query, where, updateDoc, deleteField, deleteDoc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDCPKcIchnUenkZbPlru_S3l2qFbPs0zBA",
@@ -82,29 +139,101 @@
       appId: "1:1003361096683:web:b64a04eff710fe12d77fae"
     };
 
-    let appFB = null, db = null;
-    try { appFB = initializeApp(firebaseConfig); db = getFirestore(appFB); }
+    let appFB = null, db = null, auth = null, provider = null;
+    try {
+      appFB = initializeApp(firebaseConfig);
+      db = getFirestore(appFB);
+      auth = getAuth(appFB);
+      provider = new GoogleAuthProvider();
+    }
     catch(e){ console.warn('Firebase non configurato o configurazione non valida. Funzionamento senza sincronizzazione.'); }
 
-    // Doppia password
-    const PASSWORD_USER = "Prenotazioni";
-    const PASSWORD_ADMIN = "PrenotazioniAdmin";
+    // ============================
+    //  ⚠️ CONFIGURAZIONE ACCESSO — CAMBIA QUESTI VALORI
+    // ============================
+    const ALLOWED_DOMAIN = '@istitutoboselli.edu.it'; // ⚠️ Sostituisci con il dominio email della tua scuola (es. '@iisfermi.edu.it')
+    const ADMIN_EMAILS = [
+      'mariano.bovi@istitutoboselli.edu.it',
+      'ufficio.tecnico@istitutoboselli.edu.it',               // ⚠️ Sostituisci con la tua email admin reale
+      // aggiungi altri admin qui sotto (separati da virgola):
+      // 'altroadmin@scuola.it',
+    ];
+
     let isAdmin = false;
+    let currentUser = null; // { uid, email, displayName }
 
     // Gate
     const gate = document.getElementById('gate');
     const app = document.getElementById('app');
-    const pwd = document.getElementById('pwd');
     const gateErr = document.getElementById('gateErr');
-    document.getElementById('enterBtn').addEventListener('click', unlock);
-    pwd.addEventListener('keydown', (e)=>{ if(e.key==='Enter') unlock(); });
-    function unlock(){
-      const val = pwd.value;
-      if(val === PASSWORD_USER){ isAdmin = false; openApp(); }
-      else if(val === PASSWORD_ADMIN){ isAdmin = true; openApp(); }
-      else { gateErr.textContent = 'Password errata.'; pwd.focus(); pwd.select(); }
+    const googleSignInBtn = document.getElementById('googleSignInBtn');
+
+    googleSignInBtn.addEventListener('click', signInWithGoogle);
+
+    async function signInWithGoogle(){
+      if(!auth || !provider){ gateErr.textContent = 'Firebase non configurato. Controlla la console.'; return; }
+      gateErr.textContent = '';
+      googleSignInBtn.disabled = true;
+      try {
+        await signInWithPopup(auth, provider);
+        // onAuthStateChanged gestisce il resto
+      } catch(e){
+        console.error('Errore sign-in:', e);
+        gateErr.textContent = 'Errore durante l\'accesso: ' + (e.code || e.message || 'riprova');
+      } finally {
+        googleSignInBtn.disabled = false;
+      }
     }
-    function openApp(){ gate.style.display = 'none'; app.hidden = false; initCalendar(); attachRealtime(); }
+
+    async function logout(){
+      if(!auth) return;
+      try { await signOut(auth); } catch(e){ console.error(e); }
+      window.location.reload();
+    }
+
+    // Osserva lo stato di autenticazione
+    if(auth){
+      onAuthStateChanged(auth, (user) => {
+        if(user){
+          const email = (user.email || '').toLowerCase();
+          const domain = ALLOWED_DOMAIN.toLowerCase();
+          // Verifica dominio
+          if(domain && !email.endsWith(domain)){
+            gateErr.textContent = `Accesso riservato agli account ${ALLOWED_DOMAIN}. Email usata: ${email}`;
+            signOut(auth);
+            return;
+          }
+          currentUser = { uid: user.uid, email: email, displayName: user.displayName || email };
+          isAdmin = ADMIN_EMAILS.map(e => e.toLowerCase()).includes(email);
+          openApp();
+        } else {
+          currentUser = null;
+          isAdmin = false;
+          gate.style.display = 'grid';
+          app.hidden = true;
+        }
+      });
+    } else {
+      gateErr.textContent = 'Firebase non inizializzato. Controlla la configurazione.';
+    }
+
+    function openApp(){ gate.style.display = 'none'; app.hidden = false; updateUserDisplay(); initCalendar(); attachRealtime(); initAnnouncements(); }
+
+    function updateUserDisplay(){
+      const ui = document.getElementById('userInfo');
+      if(!ui || !currentUser) return;
+      ui.innerHTML = '';
+      const who = document.createElement('span');
+      who.className = 'user-email';
+      who.textContent = currentUser.email + (isAdmin ? ' (Admin)' : '');
+      const out = document.createElement('button');
+      out.className = 'ghost';
+      out.type = 'button';
+      out.textContent = 'Esci';
+      out.addEventListener('click', logout);
+      ui.appendChild(who);
+      ui.appendChild(out);
+    }
 
     // Sedi/Labs
     const LABS = { TO1: [ 'laboratorio 27', 'laboratorio 29', 'laboratorio multimediale' ], TO3: [ 'laboratorio 1', 'laboratorio 2' ] };
@@ -181,13 +310,13 @@
 
     async function ensureDayLoaded(iso){ if(monthCache[iso]) return; if(!db) { monthCache[iso] = { month: monthStr(), slots: {} }; return; } const ref = doc(db, 'labs', labKey(), 'days', iso); const snap = await getDoc(ref); if(snap.exists()) monthCache[iso] = snap.data(); else monthCache[iso] = { month: monthStr(), slots: {} }; }
 
-    function buildSlots(){ const dayMap = monthCache[currentISO]?.slots || {}; slotsBody.innerHTML = ''; SLOTS.forEach(slot => { const tr = document.createElement('tr'); const tdTime = document.createElement('td'); tdTime.textContent = slot; tr.appendChild(tdTime); const tdState = document.createElement('td'); const booked = !!dayMap[slot]; const tag = document.createElement('span'); tag.className = 'tag ' + (booked ? 'busy' : 'free'); tag.textContent = booked ? 'Prenotato' : 'Libero'; tdState.appendChild(tag); tr.appendChild(tdState); const tdInfo = document.createElement('td'); tdInfo.textContent = booked ? `${dayMap[slot].prof} – Classe ${dayMap[slot].classe}` : '—'; tr.appendChild(tdInfo); const tdAct = document.createElement('td'); const actions = document.createElement('div'); actions.className = 'row-actions'; if(!booked){ const btn = document.createElement('button'); btn.textContent = 'Prenota'; btn.addEventListener('click', ()=> showInlineForm(tr, slot)); actions.appendChild(btn); } else if(isAdmin){ const del = document.createElement('button'); del.textContent = 'Cancella'; del.className='ghost'; del.addEventListener('click', ()=> { cancelSlot(slot); }); actions.appendChild(del); } tdAct.appendChild(actions); tr.appendChild(tdAct); slotsBody.appendChild(tr); }); }
+    function buildSlots(){ const dayMap = monthCache[currentISO]?.slots || {}; slotsBody.innerHTML = ''; SLOTS.forEach(slot => { const tr = document.createElement('tr'); const tdTime = document.createElement('td'); tdTime.textContent = slot; tr.appendChild(tdTime); const tdState = document.createElement('td'); const booked = !!dayMap[slot]; const tag = document.createElement('span'); tag.className = 'tag ' + (booked ? 'busy' : 'free'); tag.textContent = booked ? 'Prenotato' : 'Libero'; tdState.appendChild(tag); tr.appendChild(tdState); const tdInfo = document.createElement('td'); tdInfo.textContent = booked ? `${dayMap[slot].prof} – Classe ${dayMap[slot].classe}` : '—'; tr.appendChild(tdInfo); const tdAct = document.createElement('td'); const actions = document.createElement('div'); actions.className = 'row-actions'; if(!booked){ const btn = document.createElement('button'); btn.textContent = 'Prenota'; btn.addEventListener('click', ()=> showInlineForm(tr, slot)); actions.appendChild(btn); } else { const canCancel = isAdmin || (currentUser && dayMap[slot].uid === currentUser.uid); if(canCancel){ const del = document.createElement('button'); del.textContent = 'Cancella'; del.className='ghost'; del.addEventListener('click', ()=> { cancelSlot(slot); }); actions.appendChild(del); } } tdAct.appendChild(actions); tr.appendChild(tdAct); slotsBody.appendChild(tr); }); }
 
     function showInlineForm(tr, slot){ const old = tr.parentElement.querySelectorAll('.inline-form-row'); old.forEach(n => n.remove()); const form = document.createElement('div'); form.className = 'inline-form'; const p = document.createElement('input'); p.type = 'text'; p.placeholder = 'Nome professore'; p.autocomplete = 'name'; const c = document.createElement('input'); c.type = 'text'; c.placeholder = 'Classe'; const save = document.createElement('button'); save.textContent = 'Conferma'; const cancel = document.createElement('button'); cancel.textContent = 'Annulla'; cancel.className='ghost'; save.addEventListener('click', ()=>{ const prof = (p.value||'').trim(); const classe = (c.value||'').trim(); if(!prof || !classe){ p.focus(); return; } bookSlot(slot, { prof, classe }); }); cancel.addEventListener('click', ()=> form.remove()); form.appendChild(p); form.appendChild(c); form.appendChild(save); form.appendChild(cancel); const td = document.createElement('td'); td.colSpan = 4; td.appendChild(form); const trForm = document.createElement('tr'); trForm.className='inline-form-row'; trForm.appendChild(td); tr.insertAdjacentElement('afterend', trForm); p.focus(); }
 
-    async function bookSlot(slot, data){ if(!monthCache[currentISO]) monthCache[currentISO] = { month: monthStr(), slots: {} }; if(monthCache[currentISO].slots[slot]){ buildSlots(); return; } monthCache[currentISO].slots[slot] = { prof: data.prof, classe: data.classe, ts: Date.now() }; buildSlots(); render(); if(db){ const ref = doc(db, 'labs', labKey(), 'days', currentISO); await setDoc(ref, monthCache[currentISO], { merge: true }); } else { const dbLoc = loadAllLocal(); if(!dbLoc[labKey()]) dbLoc[labKey()] = {}; if(!dbLoc[labKey()][currentISO]) dbLoc[labKey()][currentISO] = { month: monthStr(), slots:{} }; dbLoc[labKey()][currentISO].slots[slot] = monthCache[currentISO].slots[slot]; saveAllLocal(dbLoc); } }
+    async function bookSlot(slot, data){ if(!monthCache[currentISO]) monthCache[currentISO] = { month: monthStr(), slots: {} }; if(monthCache[currentISO].slots[slot]){ buildSlots(); return; } monthCache[currentISO].slots[slot] = { prof: data.prof, classe: data.classe, ts: Date.now(), uid: currentUser?.uid || null, email: currentUser?.email || null }; buildSlots(); render(); if(db){ const ref = doc(db, 'labs', labKey(), 'days', currentISO); await setDoc(ref, monthCache[currentISO], { merge: true }); } else { const dbLoc = loadAllLocal(); if(!dbLoc[labKey()]) dbLoc[labKey()] = {}; if(!dbLoc[labKey()][currentISO]) dbLoc[labKey()][currentISO] = { month: monthStr(), slots:{} }; dbLoc[labKey()][currentISO].slots[slot] = monthCache[currentISO].slots[slot]; saveAllLocal(dbLoc); } }
 
-    async function cancelSlot(slot){ if(!isAdmin) return; if(!monthCache[currentISO] || !monthCache[currentISO].slots[slot]){ buildSlots(); return; } delete monthCache[currentISO].slots[slot]; buildSlots(); render(); if(db){ const ref = doc(db, 'labs', labKey(), 'days', currentISO); await updateDoc(ref, { [`slots.${slot}`]: deleteField(), month: monthStr() }); } else { const dbLoc = loadAllLocal(); if(dbLoc[labKey()] && dbLoc[labKey()][currentISO]){ delete dbLoc[labKey()][currentISO].slots[slot]; saveAllLocal(dbLoc); } } }
+    async function cancelSlot(slot){ const slotData = monthCache[currentISO]?.slots?.[slot]; const canCancel = isAdmin || (slotData && currentUser && slotData.uid === currentUser.uid); if(!canCancel) return; if(!slotData){ buildSlots(); return; } delete monthCache[currentISO].slots[slot]; buildSlots(); render(); if(db){ const ref = doc(db, 'labs', labKey(), 'days', currentISO); await updateDoc(ref, { [`slots.${slot}`]: deleteField(), month: monthStr() }); } else { const dbLoc = loadAllLocal(); if(dbLoc[labKey()] && dbLoc[labKey()][currentISO]){ delete dbLoc[labKey()][currentISO].slots[slot]; saveAllLocal(dbLoc); } } }
 
     function isoDate(d){ const y = d.getFullYear(); const m = String(d.getMonth()+1).padStart(2,'0'); const da = String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${da}`; }
 
@@ -196,25 +325,157 @@
     function loadAllLocal(){ try { return JSON.parse(localStorage.getItem(LKEY)) || {}; } catch(e){ return {}; } }
     function saveAllLocal(data){ localStorage.setItem(LKEY, JSON.stringify(data)); }
 
+    // ============================
+    //  ANNUNCI (admin scrive, utenti leggono)
+    // ============================
+    const AKEY = 'labs_annunci_v1';
+    const adminAnnounce = document.getElementById('adminAnnounce');
+    const announceText  = document.getElementById('announceText');
+    const announcePublish = document.getElementById('announcePublish');
+    const announceList  = document.getElementById('announceList');
+    const noAnnounce    = document.getElementById('noAnnounce');
+    let unsubA = null;
+
+    function initAnnouncements(){
+      adminAnnounce.hidden = !isAdmin;
+      announcePublish.addEventListener('click', publishAnnouncement);
+      announceText.addEventListener('keydown', (e) => {
+        if(e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); publishAnnouncement(); }
+      });
+
+      if(db){
+        if(unsubA){ unsubA(); unsubA = null; }
+        const col = collection(db, 'annunci');
+        unsubA = onSnapshot(col, (snap) => {
+          const items = [];
+          snap.forEach(d => items.push({ id: d.id, ...d.data() }));
+          items.sort((a,b) => (b.ts || 0) - (a.ts || 0));
+          renderAnnouncements(items);
+        });
+      } else {
+        const items = loadAnnouncementsLocal().slice().sort((a,b) => (b.ts || 0) - (a.ts || 0));
+        renderAnnouncements(items);
+      }
+    }
+
+    async function publishAnnouncement(){
+      if(!isAdmin) return;
+      const testo = (announceText.value || '').trim();
+      if(!testo) { announceText.focus(); return; }
+      const ts = Date.now();
+      const id = String(ts) + '-' + Math.random().toString(36).slice(2,8);
+      const entry = { testo, ts };
+      announcePublish.disabled = true;
+      try {
+        if(db){
+          await setDoc(doc(db, 'annunci', id), entry);
+        } else {
+          const arr = loadAnnouncementsLocal();
+          arr.push({ id, ...entry });
+          saveAnnouncementsLocal(arr);
+          renderAnnouncements(arr.slice().sort((a,b) => (b.ts||0) - (a.ts||0)));
+        }
+        announceText.value = '';
+      } catch(e){
+        console.error('Errore pubblicazione annuncio:', e);
+        alert('Errore durante la pubblicazione dell\'annuncio.');
+      } finally {
+        announcePublish.disabled = false;
+      }
+    }
+
+    async function deleteAnnouncement(id){
+      if(!isAdmin) return;
+      if(!confirm('Eliminare questo annuncio?')) return;
+      try {
+        if(db){
+          await deleteDoc(doc(db, 'annunci', id));
+        } else {
+          const arr = loadAnnouncementsLocal().filter(a => a.id !== id);
+          saveAnnouncementsLocal(arr);
+          renderAnnouncements(arr.slice().sort((a,b) => (b.ts||0) - (a.ts||0)));
+        }
+      } catch(e){
+        console.error('Errore eliminazione annuncio:', e);
+        alert('Errore durante l\'eliminazione dell\'annuncio.');
+      }
+    }
+
+    function renderAnnouncements(items){
+      announceList.innerHTML = '';
+      if(!items || !items.length){
+        noAnnounce.hidden = false;
+        return;
+      }
+      noAnnounce.hidden = true;
+      items.forEach(a => {
+        const row = document.createElement('div');
+        row.className = 'announce-item';
+        const left = document.createElement('div');
+        left.className = 'ann-left';
+        const t = document.createElement('div');
+        t.className = 'text';
+        t.textContent = a.testo || '';
+        const m = document.createElement('div');
+        m.className = 'meta';
+        const d = new Date(a.ts || Date.now());
+        m.textContent = d.toLocaleString(locale, { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+        left.appendChild(t);
+        left.appendChild(m);
+        row.appendChild(left);
+        if(isAdmin){
+          const del = document.createElement('button');
+          del.className = 'del';
+          del.textContent = 'Elimina';
+          del.addEventListener('click', () => deleteAnnouncement(a.id));
+          row.appendChild(del);
+        }
+        announceList.appendChild(row);
+      });
+    }
+
+    function loadAnnouncementsLocal(){ try { return JSON.parse(localStorage.getItem(AKEY)) || []; } catch(e){ return []; } }
+    function saveAnnouncementsLocal(arr){ localStorage.setItem(AKEY, JSON.stringify(arr)); }
+
     const warn = document.getElementById('warn');
     if(!db){ warn.textContent = 'Sincronizzazione disattivata: configura Firebase per visibilità multi-PC.'; }
   </script>
 </head>
 <body>
-  <!-- Password Gate -->
+  <!-- Gate Google Sign-In -->
   <div id="gate">
     <div class="card">
-      <h1 class="title">Prenotazioni Laboratori – Accesso</h1>
-      <p class="subtitle">Inserisci la password (utente o admin).</p>
-      <div class="input-row">
-        <input id="pwd" type="password" placeholder="Password" autocomplete="current-password" />
-        <button id="enterBtn" aria-label="Entra">Entra</button>
-      </div>
+      <h1 class="title">Prenotazioni Laboratori</h1>
+      <p class="subtitle">Accedi con il tuo account Google della scuola per continuare.</p>
+      <button id="googleSignInBtn" class="google-btn" type="button">
+        <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#4285F4" d="M45.12 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h11.84c-.51 2.75-2.06 5.08-4.39 6.64v5.52h7.11c4.16-3.83 6.56-9.47 6.56-16.17z"/><path fill="#34A853" d="M24 46c5.94 0 10.92-1.97 14.56-5.33l-7.11-5.52c-1.97 1.32-4.49 2.1-7.45 2.1-5.73 0-10.58-3.87-12.31-9.07H4.34v5.7C7.96 41.07 15.4 46 24 46z"/><path fill="#FBBC05" d="M11.69 28.18C11.25 26.86 11 25.45 11 24s.25-2.86.69-4.18v-5.7H4.34C2.85 17.09 2 20.45 2 24c0 3.55.85 6.91 2.34 9.88l7.35-5.7z"/><path fill="#EA4335" d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 4.18 29.93 2 24 2 15.4 2 7.96 6.93 4.34 14.12l7.35 5.7c1.73-5.2 6.58-9.07 12.31-9.07z"/></svg>
+        <span>Accedi con Google</span>
+      </button>
       <div id="gateErr" class="err"></div>
     </div>
   </div>
 
   <div class="wrap" aria-hidden="true" id="app" hidden>
+    <div class="topbar">
+      <div id="userInfo" class="user-info"></div>
+    </div>
+
+    <!-- Annunci -->
+    <section class="announcements announcements-top" aria-label="Annunci">
+      <h2>📢 Annunci</h2>
+
+      <div id="adminAnnounce" class="ann-form" hidden>
+        <label for="announceText" class="sr-only">Scrivi un annuncio</label>
+        <textarea id="announceText" placeholder="Scrivi un annuncio visibile a tutti gli utenti... (Ctrl+Invio per pubblicare)" rows="2"></textarea>
+        <div class="row-end">
+          <button id="announcePublish">Pubblica annuncio</button>
+        </div>
+      </div>
+
+      <div id="announceList" class="announce-list"></div>
+      <p id="noAnnounce" class="no-announce">Nessun annuncio al momento.</p>
+    </section>
+
     <header>
       <div class="lab-picker">
         <label for="siteSel" class="sr-only">Sede</label>
@@ -261,8 +522,8 @@
     </div>
     <div class="foot">
       <div class="legend">
-        <span><span class="dotl" style="background:#79d28a;"></span> Libero</span>
-        <span><span class="dotl" style="background:#ffd36e;"></span> Prenotato</span>
+        <span><span class="dotl" style="background:#2e9f48;"></span> Libero</span>
+        <span><span class="dotl" style="background:#e3a500;"></span> Prenotato</span>
       </div>
     </div>
   </dialog>
