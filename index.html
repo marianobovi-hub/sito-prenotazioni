@@ -128,7 +128,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
     import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, query, where, updateDoc, deleteField, deleteDoc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, setPersistence, inMemoryPersistence } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDCPKcIchnUenkZbPlru_S3l2qFbPs0zBA",
@@ -144,6 +144,8 @@
       appFB = initializeApp(firebaseConfig);
       db = getFirestore(appFB);
       auth = getAuth(appFB);
+      // Persistenza solo in memoria: ogni refresh/chiusura richiede nuovo login
+      setPersistence(auth, inMemoryPersistence).catch(e => console.warn('setPersistence fallito:', e));
       provider = new GoogleAuthProvider();
     }
     catch(e){ console.warn('Firebase non configurato o configurazione non valida. Funzionamento senza sincronizzazione.'); }
@@ -168,6 +170,35 @@
     const gateErr = document.getElementById('gateErr');
     const googleSignInBtn = document.getElementById('googleSignInBtn');
 
+    // Step 1: password
+    const PASSWORD = "Prenotazioni";
+    let passwordOk = false; // solo in memoria: persa ad ogni refresh/chiusura
+    const gateStep1 = document.getElementById('gateStep1');
+    const gateStep2 = document.getElementById('gateStep2');
+    const pwdInput = document.getElementById('pwd');
+    const enterBtn = document.getElementById('enterBtn');
+    const gateErrPwd = document.getElementById('gateErrPwd');
+
+    function showStep1(){ gateStep1.hidden = false; gateStep2.hidden = true; pwdInput.value = ''; setTimeout(()=> pwdInput.focus(), 50); }
+    function showStep2(){ gateStep1.hidden = true; gateStep2.hidden = false; }
+
+    function checkPassword(){
+      if(pwdInput.value === PASSWORD){
+        passwordOk = true;
+        gateErrPwd.textContent = '';
+        showStep2();
+      } else {
+        gateErrPwd.textContent = 'Password errata.';
+        pwdInput.focus(); pwdInput.select();
+      }
+    }
+
+    enterBtn.addEventListener('click', checkPassword);
+    pwdInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') checkPassword(); });
+
+    // All'avvio mostro sempre lo step password
+    showStep1();
+
     googleSignInBtn.addEventListener('click', signInWithGoogle);
 
     async function signInWithGoogle(){
@@ -187,6 +218,7 @@
 
     async function logout(){
       if(!auth) return;
+      passwordOk = false;
       try { await signOut(auth); } catch(e){ console.error(e); }
       window.location.reload();
     }
@@ -205,12 +237,15 @@
           }
           currentUser = { uid: user.uid, email: email, displayName: user.displayName || email };
           isAdmin = ADMIN_EMAILS.map(e => e.toLowerCase()).includes(email);
-          openApp();
+          // Apre l'app solo se la password è già stata inserita
+          if(passwordOk) openApp();
+          else showStep1();
         } else {
           currentUser = null;
           isAdmin = false;
           gate.style.display = 'grid';
           app.hidden = true;
+          if(passwordOk) showStep2(); else showStep1();
         }
       });
     } else {
@@ -442,16 +477,28 @@
   </script>
 </head>
 <body>
-  <!-- Gate Google Sign-In -->
+  <!-- Gate: Step 1 (password) + Step 2 (Google Sign-In) -->
   <div id="gate">
     <div class="card">
-      <h1 class="title">Prenotazioni Laboratori</h1>
-      <p class="subtitle">Accedi con il tuo account Google della scuola per continuare.</p>
-      <button id="googleSignInBtn" class="google-btn" type="button">
-        <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#4285F4" d="M45.12 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h11.84c-.51 2.75-2.06 5.08-4.39 6.64v5.52h7.11c4.16-3.83 6.56-9.47 6.56-16.17z"/><path fill="#34A853" d="M24 46c5.94 0 10.92-1.97 14.56-5.33l-7.11-5.52c-1.97 1.32-4.49 2.1-7.45 2.1-5.73 0-10.58-3.87-12.31-9.07H4.34v5.7C7.96 41.07 15.4 46 24 46z"/><path fill="#FBBC05" d="M11.69 28.18C11.25 26.86 11 25.45 11 24s.25-2.86.69-4.18v-5.7H4.34C2.85 17.09 2 20.45 2 24c0 3.55.85 6.91 2.34 9.88l7.35-5.7z"/><path fill="#EA4335" d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 4.18 29.93 2 24 2 15.4 2 7.96 6.93 4.34 14.12l7.35 5.7c1.73-5.2 6.58-9.07 12.31-9.07z"/></svg>
-        <span>Accedi con Google</span>
-      </button>
-      <div id="gateErr" class="err"></div>
+      <div id="gateStep1">
+        <h1 class="title">Prenotazioni Laboratori</h1>
+        <p class="subtitle">Inserisci la password per accedere.</p>
+        <div class="input-row">
+          <input id="pwd" type="password" placeholder="Password" autocomplete="current-password" />
+          <button id="enterBtn" type="button" aria-label="Entra">Entra</button>
+        </div>
+        <div id="gateErrPwd" class="err"></div>
+      </div>
+
+      <div id="gateStep2" hidden>
+        <h1 class="title">Prenotazioni Laboratori</h1>
+        <p class="subtitle">Accedi con il tuo account Google della scuola per continuare.</p>
+        <button id="googleSignInBtn" class="google-btn" type="button">
+          <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#4285F4" d="M45.12 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h11.84c-.51 2.75-2.06 5.08-4.39 6.64v5.52h7.11c4.16-3.83 6.56-9.47 6.56-16.17z"/><path fill="#34A853" d="M24 46c5.94 0 10.92-1.97 14.56-5.33l-7.11-5.52c-1.97 1.32-4.49 2.1-7.45 2.1-5.73 0-10.58-3.87-12.31-9.07H4.34v5.7C7.96 41.07 15.4 46 24 46z"/><path fill="#FBBC05" d="M11.69 28.18C11.25 26.86 11 25.45 11 24s.25-2.86.69-4.18v-5.7H4.34C2.85 17.09 2 20.45 2 24c0 3.55.85 6.91 2.34 9.88l7.35-5.7z"/><path fill="#EA4335" d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 4.18 29.93 2 24 2 15.4 2 7.96 6.93 4.34 14.12l7.35 5.7c1.73-5.2 6.58-9.07 12.31-9.07z"/></svg>
+          <span>Accedi con Google</span>
+        </button>
+        <div id="gateErr" class="err"></div>
+      </div>
     </div>
   </div>
 
