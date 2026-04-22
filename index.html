@@ -3,22 +3,25 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Prenotazioni Laboratori</title>
+  <title>Prenotazioni Laboratori – TO1/TO3</title>
   <style>
     :root {
-      --bg: #f3f6fc;
+      /* Tema I.I.S. Paolo Boselli: blu navy + giallo oro */
+      --bg: #f4f6fb;
       --card: #ffffff;
-      --ink: #1a2340;
-      --muted: #6b7280;
-      --accent: #4a7dff;
-      --accent-2: #6ea8fe;
+      --ink: #12285c;           /* blu navy Boselli per testi */
+      --muted: #5b6a8a;
+      --accent: #1e3a8a;        /* blu navy principale */
+      --accent-2: #2b4fa8;      /* blu navy più chiaro per gradienti */
+      --gold: #ffc72c;          /* giallo oro Boselli */
+      --gold-dark: #e0a800;
       --danger: #d64545;
       --ok: #2e9f48;
-      --grid: #e6eaf3;
-      --border: #d9dfeb;
+      --grid: #e4e9f4;
+      --border: #d4dbeb;
       --cell: #ffffff;
       --cell-hover: #eef2fb;
-      --soft: #f7f9fe;
+      --soft: #f6f8fd;
       --warn: #a86a00;
     }
     * { box-sizing: border-box; }
@@ -26,7 +29,7 @@
     body {
       margin: 0;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-      background: radial-gradient(1250px 600px at 10% -10%, #e6ecfa 0%, #f3f6fc 55%), var(--bg);
+      background: radial-gradient(1250px 600px at 10% -10%, #dde4f5 0%, #f4f6fb 55%), var(--bg);
       color: var(--ink);
     }
 
@@ -40,8 +43,8 @@
       flex: 1; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--soft); color: var(--ink); outline: none; font-family: inherit; font-size: 1rem;
     }
     textarea { resize: vertical; min-height: 56px; width: 100%; }
-    input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(74,125,255,.18); }
-    button { cursor: pointer; border: 0; border-radius: 12px; padding: 12px 14px; background: linear-gradient(180deg, #6a97ff, #4a7dff); color: #ffffff; font-weight: 700; box-shadow: 0 6px 18px rgba(74,125,255,.28); }
+    input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(30,58,138,.20); }
+    button { cursor: pointer; border: 0; border-radius: 12px; padding: 12px 14px; background: linear-gradient(180deg, #2b4fa8, #1e3a8a); color: #ffffff; font-weight: 700; box-shadow: 0 6px 18px rgba(30,58,138,.30); }
     button:hover { filter: brightness(1.04); }
     button.ghost { background: none; color: var(--ink); border: 1px solid var(--border); box-shadow: none; }
     button.ghost:hover { background: var(--soft); }
@@ -59,16 +62,16 @@
     .lab-picker select { width: auto; }
 
     /* Calendar */
-    .cal { background: var(--card); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 10px 30px rgba(30,45,80,.06); }
-    .cal .dow { display: grid; grid-template-columns: repeat(7, 1fr); background: #eef2fb; border-bottom: 1px solid var(--border); }
-    .cal .dow div { padding: 10px; font-size: .85rem; color: var(--muted); text-align: center; font-weight: 600; }
+    .cal { background: var(--card); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 10px 30px rgba(18,40,92,.08); border-top: 4px solid var(--accent); }
+    .cal .dow { display: grid; grid-template-columns: repeat(7, 1fr); background: linear-gradient(180deg, #eaf0fb, #dfe6f5); border-bottom: 1px solid var(--border); }
+    .cal .dow div { padding: 10px; font-size: .85rem; color: var(--accent); text-align: center; font-weight: 700; letter-spacing: .3px; }
     .grid { display: grid; grid-template-columns: repeat(7, 1fr); }
     .cell { border: 1px solid var(--grid); min-height: 96px; padding: 8px; position: relative; background: var(--cell); transition: background .15s ease; cursor: pointer; }
     .cell:hover { background: var(--cell-hover); }
     .cell .n { font-weight: 700; color: var(--ink); }
     .cell.out { opacity: .45; }
     .cell .dot { width: 8px; height: 8px; background: var(--ok); border-radius: 50%; position: absolute; right: 8px; bottom: 8px; box-shadow: 0 0 0 2px rgba(46,159,72,.18); }
-    .cell .dot.busy { background: #e3a500; box-shadow: 0 0 0 2px rgba(227,165,0,.22); }
+    .cell .dot.busy { background: var(--gold); box-shadow: 0 0 0 2px rgba(255,199,44,.35); }
 
     /* Modal */
     dialog { width: min(820px, 96vw); border: 1px solid var(--border); border-radius: 16px; background: var(--card); color: var(--ink); box-shadow: 0 30px 120px rgba(30,45,80,.22); }
@@ -80,8 +83,8 @@
     table { width: 100%; border-collapse: collapse; }
     th, td { border-bottom: 1px solid var(--grid); padding: 10px 8px; text-align: left; }
     th { color: var(--muted); font-weight: 600; }
-    .tag { display:inline-flex; align-items:center; gap:6px; padding: 4px 8px; border-radius: 999px; border: 1px solid var(--border); font-size: .85rem; color: #355099; background: #f0f4fc; }
-    .tag.busy { color:#3a2a00; background: #ffd36e; border-color: #e9bd59; }
+    .tag { display:inline-flex; align-items:center; gap:6px; padding: 4px 8px; border-radius: 999px; border: 1px solid var(--border); font-size: .85rem; color: #12285c; background: #eaf0fb; }
+    .tag.busy { color:#3a2a00; background: #ffc72c; border-color: #e0a800; }
     .tag.free { color:#0e3a1d; background: #bfe8c8; border-color: #8ed49c; }
     .row-actions { display:flex; gap:8px; }
 
@@ -96,7 +99,7 @@
     .warn { color: var(--warn); font-size:.92rem; }
 
     /* Announcements */
-    .announcements { background: var(--card); border-radius: 16px; border: 1px solid var(--border); padding: 18px 20px; margin-top: 20px; box-shadow: 0 6px 20px rgba(30,45,80,.05); }
+    .announcements { background: var(--card); border-radius: 16px; border: 1px solid var(--border); padding: 18px 20px; margin-top: 20px; box-shadow: 0 6px 20px rgba(18,40,92,.06); border-top: 4px solid var(--gold); }
     .announcements.announcements-top { margin-top: 0; margin-bottom: 20px; }
     .announcements h2 { margin: 0 0 4px 0; font-size: 1.1rem; color: var(--ink); }
     .announcements .subtitle2 { margin: 0 0 14px 0; font-size: .9rem; color: var(--muted); }
@@ -156,11 +159,7 @@
     const ALLOWED_DOMAIN = '@istitutoboselli.edu.it'; // ⚠️ Sostituisci con il dominio email della tua scuola (es. '@iisfermi.edu.it')
     const ADMIN_EMAILS = [
       'mariano.bovi@istitutoboselli.edu.it',
-      'ufficio.tecnico@istitutoboselli.edu.it',
-      'david.chillemi@istitutoboselli.edu.it',
-      'gennaro.marano@istitutoboselli.edu.it',
-      'marco.paolini@istitutoboselli.edu.it',
-      'raffaele.mercurio@istitutoboselli.edu.it'// ⚠️ Sostituisci con la tua email admin reale
+      'ufficio.tecnico@istitutoboselli.edu.it',               // ⚠️ Sostituisci con la tua email admin reale
       // aggiungi altri admin qui sotto (separati da virgola):
       // 'altroadmin@scuola.it',
     ];
@@ -574,7 +573,7 @@
     <div class="foot">
       <div class="legend">
         <span><span class="dotl" style="background:#2e9f48;"></span> Libero</span>
-        <span><span class="dotl" style="background:#e3a500;"></span> Prenotato</span>
+        <span><span class="dotl" style="background:#ffc72c;"></span> Prenotato</span>
       </div>
     </div>
   </dialog>
