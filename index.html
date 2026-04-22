@@ -341,7 +341,7 @@
     const slotsBody = document.getElementById('slotsBody');
     document.getElementById('closeDialog').addEventListener('click', ()=> { if (typeof dialog.close === 'function') dialog.close(); else { dialog.removeAttribute('open'); dialog.style.display='none'; document.body.style.overflow=''; } });
 
-    const SLOTS = ['16:00-16:45','16:45-17:30','17:30-18:15','18:15-19:00','19:00-19:45','19:45-20:30','20:30-21:15','21:15-22:00','22:00-22:45'];
+    const SLOTS = ['08:00-09:00','09:00-10:00','10:00-11:00','11:00-12:00','12:00-13:00','13:00-14:00','14:00-15:00','15:00-16:00','16:00-16:45','16:45-17:30','17:30-18:15','18:15-19:00','19:00-19:45','19:45-20:30','20:30-21:15','21:15-22:00','22:00-22:45'];
     let currentISO = null;
 
     async function openDay(dateObj){ currentISO = isoDate(dateObj); dialogTitle.textContent = `${siteSel.value} • ${labSel.value} — ${dateObj.toLocaleDateString(locale, { weekday:'long', year:'numeric', month:'long', day:'numeric' })}`; await ensureDayLoaded(currentISO); buildSlots(); if (typeof dialog.showModal === 'function') dialog.showModal(); else { dialog.setAttribute('open',''); dialog.style.display='block'; document.body.style.overflow='hidden'; } }
