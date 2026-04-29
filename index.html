@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Prenotazioni Laboratori – TO1/TO3</title>
+  <title>Prenotazioni Laboratori</title>
   <style>
     :root {
       /* Tema I.I.S. Paolo Boselli: blu navy + giallo oro */
@@ -157,6 +157,10 @@
     //  ⚠️ CONFIGURAZIONE ACCESSO — CAMBIA QUESTI VALORI
     // ============================
     const ALLOWED_DOMAIN = '@istitutoboselli.edu.it'; // ⚠️ Sostituisci con il dominio email della tua scuola (es. '@iisfermi.edu.it')
+    const ALLOWED_EXTRA_EMAILS = [
+      'marco.matteo7@gmail.com',
+      'alfredovill86@gmail.com',
+    ];
     const ADMIN_EMAILS = [
       'mariano.bovi@istitutoboselli.edu.it',
       'ufficio.tecnico@istitutoboselli.edu.it',               // ⚠️ Sostituisci con la tua email admin reale
@@ -232,9 +236,11 @@
         if(user){
           const email = (user.email || '').toLowerCase();
           const domain = ALLOWED_DOMAIN.toLowerCase();
-          // Verifica dominio
-          if(domain && !email.endsWith(domain)){
-            gateErr.textContent = `Accesso riservato agli account ${ALLOWED_DOMAIN}. Email usata: ${email}`;
+          const extraEmails = ALLOWED_EXTRA_EMAILS.map(e => e.toLowerCase());
+          // Verifica: dominio scuola OPPURE email autorizzata extra
+          const isAllowed = (domain && email.endsWith(domain)) || extraEmails.includes(email);
+          if(!isAllowed){
+            gateErr.textContent = `Accesso non autorizzato per: ${email}`;
             signOut(auth);
             return;
           }
